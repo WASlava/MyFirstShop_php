@@ -1,0 +1,64 @@
+﻿h1 {
+    text-align: center;
+}
+
+.container {
+    max-width: 1200px;
+    margin: auto;
+}
+
+.small-picture {
+    text-align: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.big-picture {
+    height: 500px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid gray;
+}
+
+.bordBig {
+    border: 1px solid gray;
+    padding: 0px;
+    margin: 0px;
+}
+
+.bordSmall {
+    border: 1px solid gray;
+    padding: 10px;
+    margin: 0px;
+}
+
+img {
+    cursor: pointer;
+}
+
+.big-img {
+    width: 100%;
+    height: 100%;
+    padding: 10px;
+    object-fit: contain;
+}
+
+.small-img {
+    height: 64px;
+    width: 64px;
+    object-fit: contain;
+}
+
+.price-cart-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+    .price-cart-container p {
+        margin-bottom: 0;
+    }
