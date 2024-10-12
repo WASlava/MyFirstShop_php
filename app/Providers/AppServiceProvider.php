@@ -22,9 +22,9 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         // Додаємо кошик у всі подання
-        view()->composer('*', function ($view) {
-            $cart = Session::get('cart', new Cart([]));
-            $view->with('cart', $cart);
-        });
+//        view()->composer('*', function ($view) {
+//            $cart = Session::get('cart', new Cart([]));
+//            $view->with('cart', $cart);
+//        });
     }
 }

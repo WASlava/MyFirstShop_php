@@ -1,0 +1,29 @@
+POST http://127.0.0.1:8000/api/v1/auth/login
+Content-Type: application/json
+Accept: application/json
+{
+    "email": "test1@test.com",
+    "password": "password"
+}
+
+###
+GET http://127.0.0.1:8000/api/v1/auth/profil
+Authorization: Bearer 4|E4mkuBhm56XzxgI49iQZwVcA3moAr7UYlyEvHEwx586e2f0b
+
+###
+POST http://127.0.0.1:8000/api/v1/auth/register
+Content-Type: application/json
+Accept: application/json
+{
+    "email": "test1@test.com",
+    "name": "Tester 1",
+    "password": "password"
+}
+
+### "token": "1|deJPyxJDuCLOMfXWSkshL9XB7J801TiZZcVa8Xmk84ddcebe"
+
+
+POST http://127.0.0.1:8000/api/v1/auth/logout
+Authorization: Bearer 4|E4mkuBhm56XzxgI49iQZwVcA3moAr7UYlyEvHEwx586e2f0b
+Content-Type: application/json
+Accept: application/json

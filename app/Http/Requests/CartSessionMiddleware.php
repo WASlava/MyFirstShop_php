@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Http\Middleware;
+namespace App\Http\Requests;
 
-use Closure;
 use App\Models\Cart;
+use Closure;
 use Illuminate\Support\Facades\Session;
 
 class CartSessionMiddleware

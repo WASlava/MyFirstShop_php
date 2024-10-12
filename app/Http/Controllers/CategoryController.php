@@ -13,11 +13,19 @@ class CategoryController extends Controller
         $categories = Category::with('parentCategory')->get();
         return view('categories.index', compact('categories'));
     }
+//    public function index()
+//    {
+//        // Отримуємо основні категорії з дочірніми
+//        $categories = Category::whereNull('parent_category_id')->with('childCategories')->get();
+//
+//        return view('categories.index', compact('categories'));
+//    }
+
 
     // Показати конкретну категорію
     public function show($id)
     {
-        $category = Category::with('childCategories', 'products')->findOrFail($id);
+        $category = Category::with('parentCategory', 'products')->findOrFail($id);
         return view('categories.show', compact('category'));
     }
 

@@ -44,8 +44,8 @@ class ProductImage extends Model
 
     public function getFullFilename(): string
     {
-        $dir1 = $this->filename[0];
-        $dir2 = $this->filename[1];
+        $dir1 = $this->filename[0] ?? '';
+        $dir2 = $this->filename[1] ?? '';
         return $dir1 . '/' . $dir2 . '/' . $this->filename;
     }
 

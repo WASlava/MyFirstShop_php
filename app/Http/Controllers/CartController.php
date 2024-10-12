@@ -4,126 +4,149 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Product;
-use App\Models\Cart;
-use App\Models\CartItem;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Str;
 
 class CartController extends Controller
 {
-    public function index(Request $request)
+    // Відображення кошика
+    public function index()
     {
-        $cart = $this->getCart();
-        $returnUrl = $request->input('returnUrl', route('home'));
+        $cart = session()->get('cart', []); // Отримуємо кошик із сесії
 
-        return view('cart.index', [
-            'cartItems' => $cart->getCartItems(),
-            'totalPrice' => $cart->getTotalPrice(),
-            'returnUrl' => $returnUrl
-        ]);
-    }
-
-    public function setCountry()
-    {
-        session(['country' => 'Ukraine']);
-        return view('cart.setCountry');
-    }
-
-    public function getCountry()
-    {
-        $country = session('country', 'Session key country was not set!');
-        return view('cart.getCountry', ['country' => $country]);
-    }
-
-    public function getCart()
-    {
-        $cartItems = session('cart', []);
-        return new Cart($cartItems);
-    }
-
-    public function setCart(Cart $cart)
-    {
-        session(['cart' => $cart->getCartItems()]);
-    }
-
-    public function addToCart($id, Request $request)
-    {
-        $cart = $this->getCart();
-        $product = Product::find($id);
-
-        if (!$product) {
-            return abort(404);
+        $totalPrice = 0;
+        foreach ($cart as $item) {
+            $totalPrice += $item['price'] * $item['quantity'];
         }
 
-        $cart->addToCart(new CartItem(['product' => $product, 'count' => 1]));
-        $this->setCart($cart);
-
-        return redirect($request->input('returnUrl', route('home')));
+        return view('cart.index', compact('cart', 'totalPrice'));
     }
 
-    public function incCount($id)
+    // Додавання товару до кошика
+    public function addToCart(Request $request, $id)
     {
-        $cart = $this->getCart();
-        $cart->incCount($id);
-        $this->setCart($cart);
+        $product = Product::with('images', 'brand')->findOrFail($id);
 
-        return response()->json([
-            'count' => $cart->getItemCount($id),
-            'totalPrice' => $cart->getTotalPrice()
-        ]);
+        // Отримуємо назву бренду або задаємо значення за замовчуванням
+        $brandName = $product->brand ? $product->brand->brand_name : 'Unknown Brand';
+
+        $cart = session()->get('cart', []);
+
+        // Перевірка, чи є товар уже в кошику
+        if (isset($cart[$id])) {
+            $cart[$id]['quantity']++;
+        } else {
+            // Додаємо товар у кошик, якщо його немає
+            $cart[$id] = [
+                "title" => $product->title,
+                "quantity" => 1,
+                "price" => $product->price,
+                "image" => $product->images->first() ? $product->images->first()->url : 'default.jpg',
+                "brand" => $brandName,
+            ];
+        }
+
+        session()->put('cart', $cart); // Зберігаємо кошик у сесії
+
+        return redirect()->route('cart.index')->with('success', 'Product added to cart!');
     }
 
-    public function decCount($id)
+    // Оновлення кількості товару
+    public function updateCart(Request $request, $id)
     {
-        $cart = $this->getCart();
-        $cart->decCount($id);
-        $this->setCart($cart);
+        $request->validate(['quantity' => 'required|integer|min:1']); // Валідація кількості
 
-        return response()->json([
-            'count' => $cart->getItemCount($id),
-            'totalPrice' => $cart->getTotalPrice()
-        ]);
+        $cart = session()->get('cart', []);
+
+        if (isset($cart[$id])) {
+            $cart[$id]['quantity'] = $request->quantity;
+            session()->put('cart', $cart);
+            return redirect()->route('cart.index')->with('success', 'Cart updated successfully!');
+        }
+
+        return redirect()->route('cart.index')->with('error', 'Product not found in cart!');
     }
 
-    public function removeFromCart($id, Request $request)
+    // Видалення товару з кошика
+    public function removeFromCart($id)
     {
-        $cart = $this->getCart();
-        $cart->removeFromCart($id);
-        $this->setCart($cart);
+        $cart = session()->get('cart', []);
 
-        return redirect()->route('cart.index', ['returnUrl' => $request->input('returnUrl', route('home'))]);
+        if (isset($cart[$id])) {
+            unset($cart[$id]);
+            session()->put('cart', $cart);
+            return redirect()->route('cart.index')->with('success', 'Product removed from cart!');
+        }
+
+        return redirect()->route('cart.index')->with('error', 'Product not found in cart!');
+    }
+
+    // Очищення кошика
+    public function clearCart()
+    {
+        session()->forget('cart');
+        return redirect()->route('cart.index')->with('success', 'Cart cleared successfully!');
+    }
+
+    // Збільшення кількості товару
+    public function increaseQuantity($id)
+    {
+        $cart = session()->get('cart', []);
+        if (isset($cart[$id])) {
+            $cart[$id]['quantity']++;
+            session()->put('cart', $cart);
+
+            return response()->json([
+                'count' => $cart[$id]['quantity'],
+                'totalPrice' => $cart[$id]['price'] * $cart[$id]['quantity']
+            ]);
+        }
+        return response()->json(['error' => 'Product not found'], 404);
+    }
+
+    // Зменшення кількості товару
+    public function decreaseQuantity($id)
+    {
+        $cart = session()->get('cart', []);
+        if (isset($cart[$id])) {
+            $cart[$id]['quantity']--;
+            if ($cart[$id]['quantity'] <= 0) {
+                unset($cart[$id]); // Видаляємо товар, якщо його кількість стала 0
+            }
+            session()->put('cart', $cart);
+
+            return response()->json([
+                'count' => isset($cart[$id]) ? $cart[$id]['quantity'] : 0,
+                'totalPrice' => isset($cart[$id]) ? $cart[$id]['price'] * $cart[$id]['quantity'] : 0
+            ]);
+        }
+        return response()->json(['error' => 'Product not found'], 404);
     }
 
     public function getTotalPrice()
     {
-        $cart = $this->getCart();
-        return response()->json(['totalPrice' => $cart->getTotalPrice()]);
-    }
+        $cart = session()->get('cart', []);
+        $totalPrice = 0;
 
-    public function buy(Request $request)
-    {
-        $cart = $this->getCart();
-        if ($cart->getCartItems()) {
-            if (!Auth::check()) {
-                return redirect()->route('login');
-            }
-
-            $user = Auth::user();
-            $total = $cart->getTotalPrice();
-            $orderDetails = view('emails.order', compact('cart', 'user', 'total'))->render();
-
-            Mail::send([], [], function ($message) use ($user, $orderDetails) {
-                $message->to($user->email)
-                    ->subject('Order Confirmation')
-                    ->setBody($orderDetails, 'text/html');
-            });
-
-            // Clear the cart after order
-            session()->forget('cart');
+        foreach ($cart as $item) {
+            $totalPrice += $item['price'] * $item['quantity'];
         }
 
-        return redirect()->route('products.index');
+        return response()->json(['totalPrice' => $totalPrice]);
+    }
+
+    public function getCartSummary()
+    {
+        $cart = session()->get('cart', []);
+        $totalItems = 0;
+        $totalPrice = 0;
+
+        foreach ($cart as $item) {
+            $totalItems += $item['quantity'];
+            $totalPrice += $item['price'] * $item['quantity'];
+        }
+
+        return response()->json([
+            'totalItems' => $totalItems,
+            'totalPrice' => $totalPrice
+        ]);
     }
 }

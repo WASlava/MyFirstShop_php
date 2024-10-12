@@ -13,10 +13,10 @@
                                             <a class="nav-link text-dark" href="{{ route('home') }}">Home</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-dark" href="#">Products</a>
-{{--                                            <a class="nav-link text-dark" href="{{ route('products.index') }}">Products</a>--}}
+{{--                    <a class="nav-link text-dark" href="#">Products</a>--}}
+                                            <a class="nav-link text-dark" href="{{ route('products.index') }}">Products</a>
                 </li>
-                {{--                    @if (Auth::check() && (Auth::user()->hasRole('Admin') || Auth::user()->hasRole('Manager')))--}}
+                                    @if (Auth::check() && (Auth::user()->hasRole('Admin') || Auth::user()->hasRole('Manager')))
                                         <li class="nav-item">
                                             <a class="nav-link text-dark" href="{{ route('account.index') }}">Account</a>
                                         </li>
@@ -32,13 +32,10 @@
                                         <li class="nav-item">
                                             <a class="nav-link text-dark" href="{{ route('categories.index') }}">Categories</a>
                                         </li>
-                                        <li class="nav-item">
-                                            <a class="nav-link text-dark" href="{{ route('claims.index') }}">Claims</a>
-                                        </li>
-                                        <li class="nav-item">
+                                       <li class="nav-item">
                                             <a class="nav-link text-dark" href="{{ route('image.index') }}">Image</a>
                                         </li>
-                {{--                    @endif--}}
+                                    @endif
             </ul>
                 <ul class="navbar-nav" style="padding-right:20px">
                     <div class="d-flex">
@@ -57,7 +54,7 @@
                 </ul>
 
             <div id="cart-summary">
-                {{--                    @include('partials._cart_summary')--}}
+                                    @include('layouts.cartSummary')
             </div>
         </div>
     </div>
