@@ -15,6 +15,7 @@ class ProductImageController extends Controller
     // Виведення всіх зображень продукту із фільтром за категорією
     public function index(Request $request)
     {
+
         $categoryId = $request->input('category_id');
         $brandId = $request->input('brand_id');
         $imagesQuery = ProductImage::with('product');
@@ -34,8 +35,9 @@ class ProductImageController extends Controller
         }
 
         $images = $imagesQuery->get();
-
-        return view('product_images.index', compact('images'));
+        $products = Product::with('images', 'category', 'brand')->get();
+        return view('product_images.index', compact('products'));
+//        return view('product_images.index', compact('images'));
     }
 
     // Виведення форми для додавання нового зображення продукту
@@ -60,7 +62,7 @@ class ProductImageController extends Controller
     {
         $validatedData = $request->validate([
             'product_id' => 'required|exists:products,id',
-            'photos.*' => 'required|image|mimes:jpg,jpeg,png,gif|max:4096',
+            'photos.*' => 'required|image|mimes:jpg,jpeg,png,gif,webp|max:4096',
         ]);
 
         $product = Product::with(['category', 'brand'])->findOrFail($request->product_id);
@@ -96,7 +98,7 @@ class ProductImageController extends Controller
     {
         // Валідація
         $request->validate([
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:4096',
         ]);
 
         // Знайти зображення за ID

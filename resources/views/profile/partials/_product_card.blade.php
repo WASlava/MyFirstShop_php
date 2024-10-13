@@ -38,7 +38,7 @@
             $defaultImage = $model->images->firstWhere('is_default', true);
         @endphp
         @if ($defaultImage)
-            <img src="{{ Storage::url('images/' . $model->category->category_name . '/' . $model->brand->brand_name . '/' . $defaultImage->filename) }}" alt="{{ $model->title }}" style="height: auto; width: 100%; object-fit: contain; margin: 5px 0 0 0;" />
+            <img src="{{ Storage::url('images/' . $model->category->category_name . '/' . $model->brand->brand_name . '/' . $defaultImage->filename) }}" alt="{{ $model->title }}" style="max-height: 200px; max-width: 100%; object-fit: contain; margin: 5px 0 0 0;" />
         @else
             <img src="{{ asset('images/no-img.jpg') }}" alt="Default Image" style="height: auto; width: 100%; object-fit: contain; margin: 5px 0 0 0;" />
         @endif
