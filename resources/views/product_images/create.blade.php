@@ -18,7 +18,7 @@
         @endif
 
         {{-- Форма для завантаження зображення --}}
-        <form action="{{ route('product_images.create') }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('product_images.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
 
             <div class="mb-3">
@@ -54,27 +54,22 @@
 @section('end_scripts')
     <script type="text/javascript">
         var catId;
-        var brandId;
 
-        // Функція onCategoryChange в глобальному контексті
         async function onCategoryChange(e) {
             let categoryId = e.target.value;
             catId = categoryId;
             let text = await getBrandsByCategory(categoryId);
-            console.log("-------------------");
-            console.log(text);
             let div = document.createElement("div");
-            let categoriesDiv = e.target.parentElement;
             div.innerHTML = text;
             let brandsDiv = document.getElementById("brandsDiv");
             if (brandsDiv) {
                 brandsDiv.replaceWith(div.firstElementChild);
-                let productsDiv = document.getElementById("productsDiv");
-                if (productsDiv)
-                    productsDiv.remove();
+
+            } else {
+                e.target.parentElement.after(div.firstChild);
             }
-            else categoriesDiv.after(div.firstChild);
         }
+
         async function getBrandsByCategory(categoryId) {
             let resp = await fetch(`/product_images/getBrandsByCategory/${categoryId}`, {
                 method: "post",
@@ -84,23 +79,25 @@
                 }
             });
             if (resp.ok === true) {
-                let textData = await resp.text();
-                console.log(textData);
-                return textData;
+                return await resp.text();
             }
         }
+
+
         async function onBrandChange(e) {
             let brandId = e.target.value;
-            console.log(brandId);
             let text = await getProducts(catId, brandId);
             let div = document.createElement("div");
             div.innerHTML = text;
             let productsDiv = document.getElementById("productsDiv");
             let brandsDiv = document.getElementById("brandsDiv");
-            if (productsDiv)
+            if (productsDiv) {
                 productsDiv.replaceWith(div.firstElementChild);
-            else brandsDiv.after(div.firstChild);
+            } else {
+                brandsDiv.after(div.firstChild);
+            }
         }
+
         async function getProducts(categoryId, brandId) {
             let bodyData = JSON.stringify({
                 categoryId: categoryId,
@@ -111,64 +108,24 @@
                 method: "post",
                 headers: {
                     "content-type": "application/json",
-                    "accept": "text/html"
+                    "accept": "text/html",
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
                 },
                 body: bodyData
             });
-            if (resp.ok == true) {
+            if (resp.ok) {
                 let textData = await resp.text();
                 console.log(textData);
                 return textData;
             } else {
-                console.error("Error fetching brands:", resp.status); // Виводимо помилку, якщо є
+                console.error("Error fetching products:", resp.status); // Виводимо помилку, якщо є
             }
         }
 
+
         // Додаємо обробник подій при завантаженні DOM
         document.addEventListener('DOMContentLoaded', function () {
-            // Якщо потрібно, ви можете ініціалізувати тут деякі елементи
+            // Ініціалізація елементів, якщо потрібно
         });
-            </script>
+    </script>
 @endsection
-{{--    <div class="container">--}}
-{{--        <h1 class="mb-4">Add New Product Image</h1>--}}
-
-{{--        --}}{{-- Виведення помилок --}}
-{{--        @if ($errors->any())--}}
-{{--            <div class="alert alert-danger">--}}
-{{--                <ul>--}}
-{{--                    @foreach ($errors->all() as $error)--}}
-{{--                        <li>{{ $error }}</li>--}}
-{{--                    @endforeach--}}
-{{--                </ul>--}}
-{{--            </div>--}}
-{{--        @endif--}}
-
-{{--        --}}{{-- Форма для додавання зображення --}}
-{{--        <form action="{{ route('product_images.store') }}" method="POST" enctype="multipart/form-data">--}}
-{{--            @csrf--}}
-
-{{--            <div class="mb-3">--}}
-{{--                <label for="product_id" class="form-label">Product</label>--}}
-{{--                <select name="product_id" id="product_id" class="form-control" required>--}}
-{{--                    <option value="">Select a Product</option>--}}
-{{--                    @foreach ($products as $product)--}}
-{{--                        <option value="{{ $product->id }}">{{ $product->name }}</option>--}}
-{{--                    @endforeach--}}
-{{--                </select>--}}
-{{--            </div>--}}
-
-{{--            <div class="mb-3">--}}
-{{--                <label for="image" class="form-label">Image</label>--}}
-{{--                <input type="file" name="image" id="image" class="form-control-file" required>--}}
-{{--            </div>--}}
-
-{{--            <div class="mb-3 form-check">--}}
-{{--                <input type="checkbox" class="form-check-input" id="is_default" name="is_default">--}}
-{{--                <label class="form-check-label" for="is_default">Set as Default Image</label>--}}
-{{--            </div>--}}
-
-{{--            <button type="submit" class="btn btn-primary">Upload Image</button>--}}
-{{--        </form>--}}
-{{--    </div>--}}
-{{--@endsection--}}

@@ -31,9 +31,13 @@
             @foreach ($images as $image)
                 <tr>
                     <td>{{ $loop->iteration }}</td>
-                    <td>{{ $image->product->name ?? 'No Product' }}</td>
+                    <td>{{ $image->product->title ?? 'No Product' }}</td>
                     <td style="width: 120px; height: 120px;">
-                        <img src="{{ $image->src }}" alt="{{ $image->product->name ?? 'No Image' }}" class="img-fluid" style="max-width: 100%; max-height: 100px; object-fit: contain;" />
+                        @if ($image->filename && $image->product)
+                            <img src="{{ Storage::url('images/' . $image->product->category->category_name . '/' . $image->product->brand->brand_name . '/' . $image->filename) }}" alt="{{ $image->product->title ?? 'No Image' }}" class="img-fluid" style="max-width: 100%; max-height: 100px; object-fit: contain;" />
+                        @else
+                            <p>No image available</p>
+                        @endif
                     </td>
                     <td>
                         @if ($image->is_default)
@@ -43,11 +47,6 @@
                         @endif
                     </td>
                     <td>
-                        {{-- Кнопка для встановлення за замовчуванням --}}
-                        @if (!$image->is_default)
-                            <a href="{{ route('product_images.set_default', $image->id) }}" class="btn btn-sm btn-outline-success">Set Default</a>
-                        @endif
-
                         {{-- Кнопки для редагування та видалення --}}
                         <a href="{{ route('product_images.edit', $image->id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
 
@@ -56,6 +55,15 @@
                             @method('DELETE')
                             <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
                         </form>
+
+                        {{-- Кнопка для встановлення за замовчуванням --}}
+                        @if (!$image->is_default)
+                            <form action="{{ route('product_images.set_default', $image->id) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="btn btn-sm btn-outline-success" style="margin-top: 5px">Set as Default</button>
+                            </form>
+                        @endif
+
                     </td>
                 </tr>
             @endforeach
@@ -64,7 +72,7 @@
     </div>
 @endsection
 
-@section('scripts')
+@section('end_scripts')
     <script>
         // Фільтрація зображень по назві продукту
         document.getElementById('filterInput').addEventListener('keyup', function() {

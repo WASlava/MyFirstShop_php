@@ -8,6 +8,7 @@ use App\Models\Product;
 use App\Models\ProductImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class ProductImageController extends Controller
 {
@@ -15,11 +16,20 @@ class ProductImageController extends Controller
     public function index(Request $request)
     {
         $categoryId = $request->input('category_id');
+        $brandId = $request->input('brand_id');
         $imagesQuery = ProductImage::with('product');
 
+        // Фільтрація за категорією
         if ($categoryId) {
             $imagesQuery->whereHas('product', function ($query) use ($categoryId) {
                 $query->where('category_id', $categoryId);
+            });
+        }
+
+        // Фільтрація за брендом
+        if ($brandId) {
+            $imagesQuery->whereHas('product', function ($query) use ($brandId) {
+                $query->where('brand_id', $brandId);
             });
         }
 
@@ -32,12 +42,17 @@ class ProductImageController extends Controller
     public function create()
     {
         $products = Product::all();
-        $brands = Brand::all();;
+        $brands = Brand::all();
         $categories = Category::all();
 
-//        return view('products.create', compact('brands', 'categories'));
-
         return view('product_images.create', compact('products', 'brands', 'categories'));
+    }
+
+    public function edit($id)
+    {
+        $image = ProductImage::findOrFail($id); // Знайти зображення за ID
+
+        return view('product_images.edit', compact('image')); // Повертаємо у вигляд редагування
     }
 
     // Збереження нового зображення
@@ -45,60 +60,82 @@ class ProductImageController extends Controller
     {
         $validatedData = $request->validate([
             'product_id' => 'required|exists:products,id',
-            'image' => 'required|image|mimes:jpg,jpeg,png,gif',
+            'photos.*' => 'required|image|mimes:jpg,jpeg,png,gif|max:4096',
         ]);
 
-        $product = Product::with('category')->findOrFail($request->product_id);
+        $product = Product::with(['category', 'brand'])->findOrFail($request->product_id);
+        $categoryFolder = 'images/' . $product->category->category_name; // Шлях до папки категорії
+        $brandFolder = $product->brand ? $product->brand->brand_name : 'no-brand'; // Шлях до папки бренду
 
-        if ($request->hasFile('image')) {
-            $image = $request->file('image');
+        foreach ($request->file('photos') as $image) {
             $filename = $image->hashName();
 
-            // Структура папок за категоріями
-            $categoryFolder = 'categories/' . $product->category->name;
-            $path = $image->storeAs("$categoryFolder/product_images", $filename, 'public');
+            // Створення шляху до зображення
+            $path = $categoryFolder . '/' . $brandFolder;
+
+            // Створення папок, якщо вони не існують
+            Storage::disk('public')->makeDirectory($path);
+
+            // Збереження зображення у вказаному шляху
+            $image->storeAs($path, $filename, 'public');
 
             ProductImage::create([
                 'original_filename' => $image->getClientOriginalName(),
                 'filename' => $filename,
                 'disk' => 'public',
-                'is_default' => false,
+                'is_default' => $request->has('is_default') ? true : false,
                 'product_id' => $request->product_id,
             ]);
-
-            return redirect()->route('product_images.index')->with('success', 'Image uploaded successfully.');
         }
 
-        return back()->with('error', 'Failed to upload image.');
+        return redirect()->route('product_images.index')->with('success', 'Images uploaded successfully.');
     }
 
     // Оновлення зображення
     public function update(Request $request, $id)
     {
-        $image = ProductImage::findOrFail($id);
-
-        $validatedData = $request->validate([
-            'image' => 'nullable|image|mimes:jpg,jpeg,png,gif',
+        // Валідація
+        $request->validate([
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        if ($request->hasFile('image')) {
-            // Видалення старого зображення
-            Storage::disk($image->disk)->delete($image->getFullFilename());
+        // Знайти зображення за ID
+        $image = ProductImage::findOrFail($id);
 
-            // Збереження нового
-            $newImage = $request->file('image');
-            $filename = $newImage->hashName();
-            $categoryFolder = 'categories/' . $image->product->category->name;
-            $path = $newImage->storeAs("$categoryFolder/product_images", $filename, $image->disk);
+        // Шлях до старого зображення
+        $oldImagePath = 'images/' . $image->product->category->category_name . '/' . $image->product->brand->brand_name . '/' . $image->filename;
 
-            $image->update([
-                'original_filename' => $newImage->getClientOriginalName(),
-                'filename' => $filename,
-            ]);
+        // Видалення старого зображення, якщо воно є
+        if ($image->filename && Storage::disk('public')->exists($oldImagePath)) {
+            Storage::disk('public')->delete($oldImagePath);
         }
+
+        // Отримуємо нове зображення
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+
+            // Зберігаємо нову назву файлу
+            $originalName = $file->getClientOriginalName(); // Оригінальна назва файлу
+            $hashedName = $file->hashName();
+
+            // Шлях до нового зображення
+            $path = 'images/' . $image->product->category->category_name . '/' . $image->product->brand->brand_name . '/' . $hashedName;
+
+            // Завантаження нового зображення на публічний диск
+            Storage::disk('public')->put($path, file_get_contents($file));
+
+            // Оновлення запису у базі даних
+            $image->filename = $hashedName; // Хешована назва
+            $image->original_filename = $originalName; // Оригінальна назва
+        }
+
+        // Зберігаємо зміни
+        $image->save();
 
         return redirect()->route('product_images.index')->with('success', 'Image updated successfully.');
     }
+
+
 
     // Встановлення зображення за замовчуванням
     public function setDefault($id)
@@ -148,13 +185,38 @@ class ProductImageController extends Controller
         ProductImage::where('product_id', $product->id)->delete();
     }
 
+    // Отримання брендів по категорії
     public function getBrandsByCategory($categoryId)
     {
-        // Отримуємо бренди, що належать до цієї категорії
-        $brands = Brand::where('category_id', $categoryId)->get();
-
-        // Повертаємо частковий вигляд для селектора брендів
-        return view('partials.brands', compact('brands'));
+        try {
+            // Отримуємо унікальні бренди продуктів для вибраної категорії
+            $brands = Brand::whereHas('products', function ($query) use ($categoryId) {
+                $query->where('category_id', $categoryId);
+            })->distinct()->get();
+            // Повертаємо частковий вигляд для селектора брендів
+            return view('profile.partials.brands', compact('brands'))->render();
+        } catch (\Exception $e) {
+            \Log::error('Error fetching brands: ' . $e->getMessage());
+            return response()->json(['error' => 'Server Error'], 500);
+        }
     }
 
+
+
+    public function getProducts(Request $request)
+    {
+        $categoryId = $request->input('categoryId');
+        $brandId = $request->input('brandId');
+
+        try {
+            $products = Product::where('category_id', $categoryId)
+                ->where('brand_id', $brandId)
+                ->get();
+
+            return view('profile.partials.products', compact('products'))->render();
+        } catch (\Exception $e) {
+            \Log::error('Error fetching products: ' . $e->getMessage());
+            return response()->json(['error' => 'Server Error'], 500);
+        }
+    }
 }

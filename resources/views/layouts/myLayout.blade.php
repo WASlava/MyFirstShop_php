@@ -21,7 +21,7 @@
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="/css/site.css" />
-
+    @yield('styles')
     @yield('head_scripts')
 </head>
 <body>

@@ -6,47 +6,26 @@
     <div class="container">
         <h1 class="mb-4">Edit Product Image</h1>
 
-        {{-- Виведення помилок --}}
-        @if ($errors->any())
-            <div class="alert alert-danger">
-                <ul>
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
+        {{-- Відображення попереднього зображення --}}
+        <div class="mb-4">
+            @if ($image->filename)
+                <img src="{{ Storage::url('images/' . $image->product->category->category_name . '/' . $image->product->brand->brand_name . '/' . $image->filename) }}" alt="{{ $image->product->title ?? 'No Image' }}" class="img-fluid" style="max-width: 300px; max-height: 300px; object-fit: contain;" />
+            @else
+                <p>No image available</p>
+            @endif
+        </div>
 
-        {{-- Форма для редагування зображення --}}
         <form action="{{ route('product_images.update', $image->id) }}" method="POST" enctype="multipart/form-data">
             @csrf
             @method('PUT')
 
             <div class="mb-3">
-                <label for="product_id" class="form-label">Product</label>
-                <select name="product_id" id="product_id" class="form-control" required>
-                    <option value="">Select a Product</option>
-                    @foreach ($products as $product)
-                        <option value="{{ $product->id }}" {{ $product->id == $image->product_id ? 'selected' : '' }}>
-                            {{ $product->name }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div class="mb-3">
-                <label for="image" class="form-label">Replace Image (optional)</label>
-                <input type="file" name="image" id="image" class="form-control-file">
-                <p class="form-text">Current Image:</p>
-                <img src="{{ $image->src }}" alt="{{ $image->product->name }}" class="img-fluid" style="max-width: 100px; object-fit: contain;">
-            </div>
-
-            <div class="mb-3 form-check">
-                <input type="checkbox" class="form-check-input" id="is_default" name="is_default" {{ $image->is_default ? 'checked' : '' }}>
-                <label class="form-check-label" for="is_default">Set as Default Image</label>
+                <label for="image" class="form-label">Select a new image</label>
+                <input type="file" class="form-control" id="image" name="image" required>
             </div>
 
             <button type="submit" class="btn btn-primary">Update Image</button>
+            <a href="{{ route('product_images.index') }}" class="btn btn-secondary">Cancel</a>
         </form>
     </div>
 @endsection
