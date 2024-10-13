@@ -5,21 +5,16 @@
 
     <form action="{{ route('users.updatePassword', $user->id) }}" method="POST">
         @csrf
-{{--        @method('PUT')--}}
-
-{{--        <div class="form-group">--}}
-{{--            <label for="current_password">Current Password</label>--}}
-{{--            <input type="password" name="current_password" class="form-control">--}}
-{{--        </div>--}}
+        @method('PUT')
 
         <div class="form-group">
-            <label for="new-password">New Password</label>
-            <input type="password" name="new-password" id="new-password" class="form-control" required>
+            <label for="password">New Password</label>
+            <input type="password" name="password" id="password" class="form-control" required>
         </div>
 
         <div class="form-group">
-            <label for="new_password_confirmation">Confirm New Password</label>
-            <input type="password" name="new_password_confirmation" id="new_password_confirmation" class="form-control" required>
+            <label for="password_confirmation">Confirm New Password</label>
+            <input type="password" name="password_confirmation" id="password_confirmation" class="form-control" required>
         </div>
 
         <button type="submit" class="btn btn-primary">Change Password</button>

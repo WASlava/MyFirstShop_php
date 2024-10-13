@@ -27,7 +27,11 @@ Route::get('/', function () {
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/privacy', [HomeController::class, 'privacy'])->name('privacy');
 Route::get('/error', [HomeController::class, 'error'])->name('error');
-Route::get('/account', [HomeController::class, 'index'])->name('account.index');
+Route::get('/account', [ProfileController::class, 'index'])->name('account.index');
+Route::get('/account/{account}/edit', [ProfileController::class, 'editInf'])->name('profile.editInf');
+Route::get('/account/editInf', [ProfileController::class, 'editInf'])->name('profile.editInf');
+//Route::get('/profile/editInf', [ProfileController::class, 'edit'])->name('profile.editInf');
+Route::post('/account/updateInf', [ProfileController::class, 'updateInf'])->name('profile.updateInf');
 Route::get('/roles', [HomeController::class, 'index'])->name('roles.index');
 Route::get('/image', [HomeController::class, 'index'])->name('image.index');
 Route::resource('categories', CategoryController::class);
@@ -62,9 +66,10 @@ Route::patch('/products/{id}', [ProductsController::class, 'update'])->name('pro
 //Route::delete('cart/remove/{id}', [CartController2::class, 'remove'])->name('cart.remove');
 //Route::get('cart/clear', [CartController::class, 'clear'])->name('cart.clear');
 //Route::post('/cart/addToCart/{id}', [CartController2::class, 'addToCart'])->name('cart.addToCart');
-//Route::resource('account', AccountController::class);
+Route::resource('account', ProfileController::class);
+Route::put('/users/{id}/password', [UsersController::class, 'updatePassword'])->name('users.updatePassword');
 Route::get('/users/{id}/change-password', [UsersController::class, 'changePassword'])->name('users.changePassword');
-Route::post('/users/{id}/update-password', [UsersController::class, 'updatePassword'])->name('users.updatePassword');
+//Route::post('/users/{id}/update-password', [UsersController::class, 'updatePassword'])->name('users.updatePassword');
 Route::get('users/{id}/change-role', [RoleController::class, 'changeRole'])->name('users.changeRole');
 Route::get('users/{id}', [UsersController::class, 'show'])->name('users.show');
 Route::get('/products/show/{id}', [ProductsController::class, 'show'])->name('products.show');
@@ -73,15 +78,22 @@ Route::get('/products/show/{id}', [ProductsController::class, 'show'])->name('pr
 //Route::get('/', [MyInfoController::class, 'index'])->name('home');
 //Route::get('/Products', [MyInfoController::class, 'about'])->name('product');
 
+//Route::get('/profile', [ProfileController::class, 'edit'])->middleware(['auth'])->name('profile.edit');
+//Route::post('/profile', [ProfileController::class, 'update'])->middleware(['auth'])->name('profile.update');
+
+//Route::get('/profile', [ProfileController::class, 'edit'])->middleware(['auth'])->name('profile.edit');
+//Route::post('/profile', [ProfileController::class, 'update'])->middleware(['auth'])->name('profile.update');
+//Route::get('/profile', [ProfileController::class, 'index'])->middleware(['auth'])->name('profile.index');
+
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
+//    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-//    Route::resource('users', UsersController::class);
 });
 
 require __DIR__.'/auth.php';

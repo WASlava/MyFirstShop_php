@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
+use Nette\Utils\Image;
 
 /**
  * @property int $id
@@ -16,6 +17,14 @@ use Illuminate\Support\Collection;
  * @property boolean $is_active
  * @property int|null $image_id
  * @property Image|null $image
+ * @property string|null $phone
+ * @property string|null $address_line1
+ * @property string|null $address_line2
+ * @property string|null $city
+ * @property string|null $postal_code
+ * @property string|null $country
+ *
+ *
 // * @property Collection|Feedback[] $feedbacks
 // * @property Collection|Feedback[] $last3feedbacks
  *
@@ -26,7 +35,18 @@ class Info extends Model
 {
     protected $table = 'infos';
 
-    protected $fillable = [ 'first_name', 'last_name', 'birthday', 'is_active'];
+    protected $fillable = [
+        'first_name',
+        'last_name',
+        'birthday',
+        'is_active',
+        'phone',
+        'address_line1',
+        'address_line2',
+        'city',
+        'postal_code',
+        'country',
+    ];
     use HasFactory;
 
     public function image(): BelongsTo {

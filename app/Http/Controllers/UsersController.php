@@ -28,25 +28,29 @@ class UsersController extends Controller
     // Створення користувача
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|min:6|confirmed',
-
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users',
+            'password' => 'required|min:8|confirmed',
+            'first_name' => 'nullable|string|max:255',
+            'last_name' => 'nullable|string|max:255',
+            'birthday' => 'nullable|date',
+            'phone' => 'nullable|string|max:255',
+            'address_line1' => 'nullable|string|max:255',
+            'address_line2' => 'nullable|string|max:255',
+            'city' => 'nullable|string|max:255',
+            'postal_code' => 'nullable|string|max:20',
+            'country' => 'nullable|string|max:255',
         ]);
-
-        if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator)->withInput();
-        }
 
         // Створення користувача
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => Hash::make($request->password)
+            'password' => Hash::make($request->password),
         ]);
 
-        // Призначення ролі 'User' при створенні
+        // Призначення ролі
         $user->assignRole('User');
 
         // Додаткові дані для інформації про користувача
@@ -54,14 +58,16 @@ class UsersController extends Controller
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
             'birthday' => $request->birthday,
-            'telephone' => $request->telephone,
-            'address' => $request->address,
-            'is_active' => $request->is_active,
+            'phone' => $request->phone,
+            'address_line1' => $request->address_line1,
+            'address_line2' => $request->address_line2,
+            'city' => $request->city,
+            'postal_code' => $request->postal_code,
+            'country' => $request->country,
         ]);
 
         return redirect()->route('users.index')->with('success', 'User created successfully');
     }
-
     // Форма для редагування користувача
     public function edit($id)
     {
@@ -75,35 +81,39 @@ class UsersController extends Controller
     {
         $user = User::findOrFail($id);
 
-        $validator = Validator::make($request->all(), [
-            'name' => 'required',
-            'email' => 'required|email|unique:users,email,' . $user->id,
-            // Валідація для інших полів, якщо потрібно
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email,' . $user->id,
+            'first_name' => 'nullable|string|max:255',
+            'last_name' => 'nullable|string|max:255',
+            'birthday' => 'nullable|date',
+            'phone' => 'nullable|string|max:255',
+            'address_line1' => 'nullable|string|max:255',
+            'address_line2' => 'nullable|string|max:255',
+            'city' => 'nullable|string|max:255',
+            'postal_code' => 'nullable|string|max:20',
+            'country' => 'nullable|string|max:255',
+            'password' => 'nullable|string|confirmed|min:8',
         ]);
-
-        if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator)->withInput();
-        }
 
         // Оновлення даних користувача
         $user->update([
             'name' => $request->name,
             'email' => $request->email,
-            // Можливість змінювати пароль, якщо потрібно
             'password' => $request->password ? Hash::make($request->password) : $user->password,
         ]);
-
-        // Оновлення ролі
-        $user->syncRoles($request->role);
 
         // Оновлення додаткової інформації
         $user->info()->update([
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
             'birthday' => $request->birthday,
-            'telephone' => $request->telephone,
-            'address' => $request->address,
-            'is_active' => $request->is_active,
+            'phone' => $request->phone,
+            'address_line1' => $request->address_line1,
+            'address_line2' => $request->address_line2,
+            'city' => $request->city,
+            'postal_code' => $request->postal_code,
+            'country' => $request->country,
         ]);
 
         return redirect()->route('users.index')->with('success', 'User updated successfully');
@@ -135,16 +145,13 @@ class UsersController extends Controller
     {
         $user = User::findOrFail($id);
 
-        $validator = Validator::make($request->all(), [
-            'password' => 'required|min:6|confirmed',
+        $request->validate([
+            'password' => 'required|string|confirmed|min:8',
         ]);
-
-        if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator)->withInput();
+        if ($request->password) {
+            $user->password = Hash::make($request->password);
+            $user->save();
         }
-
-        $user->password = Hash::make($request->password);
-        $user->save();
 
         return redirect()->route('users.index')->with('success', 'Password updated successfully');
     }

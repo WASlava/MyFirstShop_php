@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Product;
+use Illuminate\Support\Facades\Storage;
 
 class CartController extends Controller
 {
@@ -23,10 +24,12 @@ class CartController extends Controller
     // Додавання товару до кошика
     public function addToCart(Request $request, $id)
     {
-        $product = Product::with('images', 'brand')->findOrFail($id);
+        $product = Product::with(['category', 'brand', 'images'])->findOrFail($id);
 
         // Отримуємо назву бренду або задаємо значення за замовчуванням
         $brandName = $product->brand ? $product->brand->brand_name : 'Unknown Brand';
+        $categoryName = $product->category ? $product->category->category_name : 'Unknown Brand';
+        $defaultImage = $product->images->where('is_default', 1)->first();
 
         $cart = session()->get('cart', []);
 
@@ -34,12 +37,16 @@ class CartController extends Controller
         if (isset($cart[$id])) {
             $cart[$id]['quantity']++;
         } else {
+            $imageUrl = $product->images->first()
+                ? Storage::url('images/' . $categoryName . '/' . $brandName . '/' . $defaultImage->filename)
+                : Storage::url('images/default.jpg');
+
             // Додаємо товар у кошик, якщо його немає
             $cart[$id] = [
                 "title" => $product->title,
                 "quantity" => 1,
                 "price" => $product->price,
-                "image" => $product->images->first() ? $product->images->first()->url : 'default.jpg',
+                "image" => $imageUrl,
                 "brand" => $brandName,
             ];
         }

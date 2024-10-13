@@ -8,12 +8,21 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\Hash;
 
 class ProfileController extends Controller
 {
     /**
      * Display the user's profile form.
      */
+
+    public function index()
+    {
+        return view('account.index', [
+            'user' => Auth::user()->load('info'),
+        ]);
+    }
+
     public function edit(Request $request): View
     {
         return view('profile.edit', [
@@ -21,9 +30,77 @@ class ProfileController extends Controller
         ]);
     }
 
+    public function editInf(Request $request): View
+    {
+        return view('account.editInf', [
+            'user' => $request->user()->load('info'),
+        ]);
+    }
+
     /**
      * Update the user's profile information.
      */
+    public function updateInf(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'first_name' => 'nullable|string|max:255',
+            'last_name' => 'nullable|string|max:255',
+            'birthday' => 'nullable|date',
+            'phone' => 'nullable|string|max:255',
+            'address_line1' => 'nullable|string|max:255',
+            'address_line2' => 'nullable|string|max:255',
+            'city' => 'nullable|string|max:255',
+            'postal_code' => 'nullable|string|max:20',
+            'country' => 'nullable|string|max:255',
+            'password' => 'nullable|string|confirmed|min:8',
+        ]);
+
+        $user = Auth::user();
+
+        // Оновлення даних користувача
+        $user->name = $request->name;
+        $user->email = $request->email;
+
+        if ($request->filled('password')) {
+            $user->password = Hash::make($request->password);
+        }
+
+        $user->save();
+
+
+
+        if ($user->info) {
+            $user->info->update($request->only([
+                'first_name',
+                'last_name',
+                'birthday',
+                'phone',
+                'address_line1',
+                'address_line2',
+                'city',
+                'postal_code',
+                'country',
+            ]));
+        } else {
+            $user->info()->create($request->only([
+                'first_name',
+                'last_name',
+                'birthday',
+                'phone',
+                'address_line1',
+                'address_line2',
+                'city',
+                'postal_code',
+                'country',
+            ]));
+        }
+
+
+        return redirect()->route('account.index')->with('success', 'Profile updated successfully.');
+    }
+
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
         $request->user()->fill($request->validated());

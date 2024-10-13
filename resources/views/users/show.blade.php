@@ -8,16 +8,29 @@
 
     <!-- Додаткова інформація з таблиці infos -->
     @if($user->info)
-        <h3>Additional Information</h3>
-        <p>First Name: {{ $user->info->first_name ?? 'N/A' }}</p>
-        <p>Last Name: {{ $user->info->last_name ?? 'N/A' }}</p>
-        <p>Birthday: {{ $user->info->birthday ?? 'N/A' }}</p>
-        <p>Telephone: {{ $user->info->telephone ?? 'N/A' }}</p>
-        <p>Address: {{ $user->info->address ?? 'N/A' }}</p>
-        <p>Active Status: {{ $user->info->is_active ? 'Active' : 'Inactive' }}</p>
+            <?php $UsInf=$user->info ?>
+        <strong>First Name:</strong> {{ $UsInf->first_name ?? 'N/A'  }}<br>
+        <strong>Last Name:</strong> {{ $UsInf->last_name ?? 'N/A'  }}<br>
+        <strong>Birthday:</strong>
+        {{
+            $UsInf->birthday
+            ? (\Carbon\Carbon::parse($UsInf->birthday)->format('Y-m-d'))
+            : 'Not specified'
+        }}<br>
+        <strong>Address:</strong>
+        {{ $UsInf->address_line1 ?? ''}}
+        {{ $UsInf->address_line2 ?? ''}},
+        {{ $UsInf->city ?? ''}},
+        {{ $UsInf->postal_code ?? ''}},
+        {{ $UsInf->country ?? ''}}<br>
+
+        <strong>Phone:</strong> {{ $UsInf->phone ?? 'N/A'  }}<br>
+        <strong>Status:</strong> {{ $UsInf->is_active ? 'Active' : 'Inactive' }}<br>
+
     @else
         <p>No additional information available.</p>
     @endif
+
 
     <a href="{{ route('users.index') }}" class="btn btn-primary">Back to list</a>
 @endsection

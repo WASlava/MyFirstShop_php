@@ -16,26 +16,29 @@
 {{--                    <a class="nav-link text-dark" href="#">Products</a>--}}
                                             <a class="nav-link text-dark" href="{{ route('products.index') }}">Products</a>
                 </li>
-                                    @if (Auth::check() && (Auth::user()->hasRole('Admin') || Auth::user()->hasRole('Manager')))
-                                        <li class="nav-item">
-                                            <a class="nav-link text-dark" href="{{ route('account.index') }}">Account</a>
-                                        </li>
-                                        <li class="nav-item">
-                                            <a class="nav-link text-dark" href="{{ route('roles.index') }}">Roles</a>
-                                        </li>
-                                        <li class="nav-item">
-                                            <a class="nav-link text-dark" href="{{ route('users.index') }}">Users</a>
-                                        </li>
-                                        <li class="nav-item">
-                                            <a class="nav-link text-dark" href="{{ route('brands.index') }}">Brands</a>
-                                        </li>
-                                        <li class="nav-item">
-                                            <a class="nav-link text-dark" href="{{ route('categories.index') }}">Categories</a>
-                                        </li>
-                                       <li class="nav-item">
-                                            <a class="nav-link text-dark" href="{{ route('image.index') }}">Image</a>
-                                        </li>
-                                    @endif
+                    @if(Auth::check())
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" href="{{ route('account.index') }}">Profile</a>
+                        </li>
+
+                    @endif
+                    @if (Auth::check() && (Auth::user()->hasRole('Admin') || Auth::user()->hasRole('Manager')))
+                        <li class="nav-item">
+                              <a class="nav-link text-dark" href="{{ route('roles.index') }}">Roles</a>
+                        </li>
+                        <li class="nav-item">
+                              <a class="nav-link text-dark" href="{{ route('users.index') }}">Users</a>
+                        </li>
+                        <li class="nav-item">
+                              <a class="nav-link text-dark" href="{{ route('brands.index') }}">Brands</a>
+                        </li>
+                        <li class="nav-item">
+                              <a class="nav-link text-dark" href="{{ route('categories.index') }}">Categories</a>
+                        </li>
+                        <li class="nav-item">
+                              <a class="nav-link text-dark" href="{{ route('image.index') }}">Image</a>
+                        </li>
+                    @endif
             </ul>
                 <ul class="navbar-nav" style="padding-right:20px">
                     <div class="d-flex">
