@@ -17,7 +17,7 @@ class CartController extends Controller
         foreach ($cart as $item) {
             $totalPrice += $item['price'] * $item['quantity'];
         }
-
+        session()->put('totalPrice', $totalPrice);
         return view('cart.index', compact('cart', 'totalPrice'));
     }
 
@@ -43,11 +43,13 @@ class CartController extends Controller
 
             // Додаємо товар у кошик, якщо його немає
             $cart[$id] = [
+                "id" => $product->id,
                 "title" => $product->title,
                 "quantity" => 1,
                 "price" => $product->price,
                 "image" => $imageUrl,
                 "brand" => $brandName,
+                "category" => $categoryName,
             ];
         }
 
@@ -100,10 +102,13 @@ class CartController extends Controller
         if (isset($cart[$id])) {
             $cart[$id]['quantity']++;
             session()->put('cart', $cart);
+            $totalPrice = $cart[$id]['price'] * $cart[$id]['quantity'];
+
+            $this->updateTotalPriceInSession($cart);
 
             return response()->json([
                 'count' => $cart[$id]['quantity'],
-                'totalPrice' => $cart[$id]['price'] * $cart[$id]['quantity']
+                'totalPrice' => $totalPrice
             ]);
         }
         return response()->json(['error' => 'Product not found'], 404);
@@ -120,9 +125,14 @@ class CartController extends Controller
             }
             session()->put('cart', $cart);
 
+            // Оновлюємо загальну вартість замовлення в сесії
+            $this->updateTotalPriceInSession($cart);
+
+            $totalPrice= isset($cart[$id]) ? $cart[$id]['price'] * $cart[$id]['quantity'] : 0;
+
             return response()->json([
                 'count' => isset($cart[$id]) ? $cart[$id]['quantity'] : 0,
-                'totalPrice' => isset($cart[$id]) ? $cart[$id]['price'] * $cart[$id]['quantity'] : 0
+                'totalPrice' => $totalPrice
             ]);
         }
         return response()->json(['error' => 'Product not found'], 404);
@@ -140,6 +150,19 @@ class CartController extends Controller
         return response()->json(['totalPrice' => $totalPrice]);
     }
 
+    private function updateTotalPriceInSession($cart): void
+    {
+        $totalPrice = 0;
+
+        foreach ($cart as $item) {
+            $totalPrice += $item['price'] * $item['quantity'];
+        }
+
+        // Записуємо загальну вартість у сесію
+        session()->put('totalPrice', $totalPrice);
+    }
+
+
     public function getCartSummary()
     {
         $cart = session()->get('cart', []);
@@ -150,7 +173,7 @@ class CartController extends Controller
             $totalItems += $item['quantity'];
             $totalPrice += $item['price'] * $item['quantity'];
         }
-
+        session()->put('totalPrice', $totalPrice);
         return response()->json([
             'totalItems' => $totalItems,
             'totalPrice' => $totalPrice

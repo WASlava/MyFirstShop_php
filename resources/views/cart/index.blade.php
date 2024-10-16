@@ -13,7 +13,7 @@
                     <th>Назва товару</th>
                     <th>Ціна за одиницю, &#8372;</th>
                     <th>Кількість</th>
-                    <th>Сумарна ціна, &#8372;</th>
+                    <th>Сума &#8372;</th>
                     <th></th>
                 </tr>
                 </thead>
@@ -50,6 +50,8 @@
             <form method="get" action="{{ route('cart.clear') }}">
                 @csrf
                 <button type="submit" class="btn btn-warning">Очистити кошик</button>
+            </form>
+            <form method="get" action="{{ route('orders.create') }}">
                 <button type="submit" class="btn btn-primary">Оформити замовлення</button>
             </form>
         @else

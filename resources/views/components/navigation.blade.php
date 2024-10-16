@@ -20,6 +20,9 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" href="{{ route('account.index') }}">Profile</a>
                         </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('orders.index') }}">My orders</a>
+                    </li>
 
                     @endif
                     @if (Auth::check() && (Auth::user()->hasRole('Admin') || Auth::user()->hasRole('Manager')))

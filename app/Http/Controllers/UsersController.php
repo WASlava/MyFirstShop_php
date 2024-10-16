@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Spatie\Permission\Models\Role;
+use Illuminate\Support\Facades\DB;
 
 class UsersController extends Controller
 {
@@ -43,31 +44,39 @@ class UsersController extends Controller
             'country' => 'nullable|string|max:255',
         ]);
 
-        // Створення користувача
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
+        DB::beginTransaction();
+        try {
+            // Створення користувача
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+            ]);
 
-        // Призначення ролі
-        $user->assignRole('User');
+            // Призначення ролі
+            $user->assignRole('User');
 
-        // Додаткові дані для інформації про користувача
-        $user->info()->create([
-            'first_name' => $request->first_name,
-            'last_name' => $request->last_name,
-            'birthday' => $request->birthday,
-            'phone' => $request->phone,
-            'address_line1' => $request->address_line1,
-            'address_line2' => $request->address_line2,
-            'city' => $request->city,
-            'postal_code' => $request->postal_code,
-            'country' => $request->country,
-        ]);
+            // Додаткові дані для інформації про користувача
+            $user->info()->create([
+                'first_name' => $request->first_name,
+                'last_name' => $request->last_name,
+                'birthday' => $request->birthday,
+                'phone' => $request->phone,
+                'address_line1' => $request->address_line1,
+                'address_line2' => $request->address_line2,
+                'city' => $request->city,
+                'postal_code' => $request->postal_code,
+                'country' => $request->country,
+            ]);
 
-        return redirect()->route('users.index')->with('success', 'User created successfully');
+            DB::commit();
+            return redirect()->route('users.index')->with('success', 'User created successfully');
+        } catch (\Exception $e) {
+            DB::rollback();
+            return redirect()->route('users.create')->with('error', 'Error occurred while creating user: ' . $e->getMessage());
+        }
     }
+
     // Форма для редагування користувача
     public function edit($id)
     {
@@ -96,33 +105,90 @@ class UsersController extends Controller
             'password' => 'nullable|string|confirmed|min:8',
         ]);
 
-        // Оновлення даних користувача
-        $user->update([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => $request->password ? Hash::make($request->password) : $user->password,
-        ]);
+        DB::beginTransaction();
+        try {
+            // Оновлення даних користувача
+            $user->update([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => $request->password ? Hash::make($request->password) : $user->password,
+            ]);
 
-        // Оновлення додаткової інформації
-        $user->info()->update([
-            'first_name' => $request->first_name,
-            'last_name' => $request->last_name,
-            'birthday' => $request->birthday,
-            'phone' => $request->phone,
-            'address_line1' => $request->address_line1,
-            'address_line2' => $request->address_line2,
-            'city' => $request->city,
-            'postal_code' => $request->postal_code,
-            'country' => $request->country,
-        ]);
+            // Оновлення додаткової інформації
+            $user->info()->update([
+                'first_name' => $request->first_name,
+                'last_name' => $request->last_name,
+                'birthday' => $request->birthday,
+                'phone' => $request->phone,
+                'address_line1' => $request->address_line1,
+                'address_line2' => $request->address_line2,
+                'city' => $request->city,
+                'postal_code' => $request->postal_code,
+                'country' => $request->country,
+            ]);
 
-        return redirect()->route('users.index')->with('success', 'User updated successfully');
+            DB::commit();
+            return redirect()->route('users.index')->with('success', 'User updated successfully');
+        } catch (\Exception $e) {
+            DB::rollback();
+            return redirect()->route('users.edit', $user->id)->with('error', 'Error occurred while updating user: ' . $e->getMessage());
+        }
     }
 
-    public function show($id)
+    // Форма для зміни пароля (GET-запит)
+    public function changePassword($id)
     {
+        $user = User::findOrFail($id);
+        return view('users.changePassword', compact('user'));
+    }
+
+    // Оновлення пароля (PUT-запит)
+    public function updatePassword(Request $request, $id)
+    {
+        $user = User::findOrFail($id);
+
+        $request->validate([
+            'password' => 'required|string|confirmed|min:8',
+        ]);
+
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        return redirect()->route('users.index')->with('success', 'Password updated successfully');
+    }
+
+    // Форма для зміни ролі користувача
+    public function changeRole($id)
+    {
+
         $user = User::with('info', 'roles')->findOrFail($id);
-        return view('users.show', compact('user'));
+        $roles = Role::all();
+
+        return view('users.changeRole', compact('user', 'roles'));
+    }
+
+    // Оновлення ролі користувача
+    public function updateRole(Request $request, $id)
+    {
+
+        $user = User::findOrFail($id);
+
+        $validator = Validator::make($request->all(), [
+            'role' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            dd($request);
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        // Додайте лог для перевірки значення ролі
+        \Log::info('Selected role:', [$request->role]);
+
+        // Оновлення ролі
+        $user->syncRoles($request->role);
+
+        return redirect()->route('users.index')->with('success', 'Role updated successfully');
     }
 
     // Видалення користувача
@@ -131,55 +197,5 @@ class UsersController extends Controller
         $user = User::findOrFail($id);
         $user->delete();
         return redirect()->route('users.index')->with('success', 'User deleted successfully');
-    }
-
-// Форма для зміни пароля (GET-запит)
-    public function changePassword($id)
-    {
-        $user = User::findOrFail($id);
-        return view('users.changePassword', compact('user'));
-    }
-
-// Оновлення пароля (PUT-запит)
-    public function updatePassword(Request $request, $id)
-    {
-        $user = User::findOrFail($id);
-
-        $request->validate([
-            'password' => 'required|string|confirmed|min:8',
-        ]);
-        if ($request->password) {
-            $user->password = Hash::make($request->password);
-            $user->save();
-        }
-
-        return redirect()->route('users.index')->with('success', 'Password updated successfully');
-    }
-
-
-    // Форма для зміни ролі користувача
-    public function changeRole($id)
-    {
-        $user = User::with('info', 'roles')->findOrFail($id);
-        $roles = Role::all();
-        return view('users.changeRole', compact('user', 'roles'));
-    }
-
-    // Оновлення ролі користувача
-    public function updateRole(Request $request, $id)
-    {
-        $user = User::findOrFail($id);
-
-        $validator = Validator::make($request->all(), [
-            'role' => 'required'
-        ]);
-
-        if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator)->withInput();
-        }
-
-        $user->syncRoles($request->role);
-
-        return redirect()->route('users.index')->with('success', 'Role updated successfully');
     }
 }

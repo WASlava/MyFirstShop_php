@@ -25,6 +25,7 @@ class ProfileController extends Controller
 
     public function edit(Request $request): View
     {
+
         return view('profile.edit', [
             'user' => $request->user(),
         ]);
@@ -32,6 +33,7 @@ class ProfileController extends Controller
 
     public function editInf(Request $request): View
     {
+
         return view('account.editInf', [
             'user' => $request->user()->load('info'),
         ]);
@@ -42,6 +44,7 @@ class ProfileController extends Controller
      */
     public function updateInf(Request $request)
     {
+
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
@@ -103,6 +106,7 @@ class ProfileController extends Controller
 
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
+
         $request->user()->fill($request->validated());
 
         if ($request->user()->isDirty('email')) {

@@ -16,7 +16,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained('users');
             $table->integer('status')->default(OrderStatus::NEW);
-            $table->string('comment', 100);
+            $table->string('comment', 100)->nullable();;
             $table->timestamps();
         });
 

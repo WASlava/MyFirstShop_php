@@ -5,19 +5,31 @@
 
     <!-- Додаткова інформація з таблиці infos -->
     @if($user->info)
-        <h3>Additional Information</h3>
-        <p>First Name: {{ $user->info->first_name ?? 'N/A' }}</p>
-        <p>Last Name: {{ $user->info->last_name ?? 'N/A' }}</p>
-        <p>Birthday: {{ $user->info->birthday ?? 'N/A' }}</p>
-        <p>Telephone: {{ $user->info->telephone ?? 'N/A' }}</p>
-        <p>Address: {{ $user->info->address ?? 'N/A' }}</p>
-        <p>Active Status: {{ $user->info->is_active ? 'Active' : 'Inactive' }}</p>
+            <?php $UsInf=$user->info ?>
+        <strong>First Name:</strong> {{ $UsInf->first_name ?? 'N/A'  }}<br>
+        <strong>Last Name:</strong> {{ $UsInf->last_name ?? 'N/A'  }}<br>
+        <strong>Birthday:</strong>
+        {{
+            $UsInf->birthday
+            ? (\Carbon\Carbon::parse($UsInf->birthday)->format('Y-m-d'))
+            : 'Not specified'
+        }}<br>
+        <strong>Address:</strong>
+        {{ $UsInf->address_line1 ?? ''}}
+        {{ $UsInf->address_line2 ?? ''}},
+        {{ $UsInf->city ?? ''}},
+        {{ $UsInf->postal_code ?? ''}},
+        {{ $UsInf->country ?? ''}}<br>
+
+        <strong>Phone:</strong> {{ $UsInf->phone ?? 'N/A'  }}<br>
+        <strong>Status:</strong> {{ $UsInf->is_active ? 'Active' : 'Inactive' }}<br>
+
     @else
         <p>No additional information available.</p>
     @endif
 
     <!-- Форма для зміни ролі користувача -->
-    <form action="{{ route('users.changeRole', $user->id) }}" method="POST">
+    <form action="{{ route('users.updateRole', $user->id) }}" method="POST">
         @csrf
         <div class="form-group">
             <label for="currentRole">Current Role:</label>
@@ -25,8 +37,8 @@
         </div>
 
         <div class="form-group">
-            <label for="newRole">Select New Role:</label>
-            <select name="newRole" id="newRole" class="form-control">
+            <label for="role">Select New Role:</label>
+            <select name="role" id="role" class="form-control">
                 @foreach($roles as $role)
                     <option value="{{ $role->name }}" {{ $user->roles->contains('name', $role->name) ? 'selected' : '' }}>
                         {{ $role->name }}
