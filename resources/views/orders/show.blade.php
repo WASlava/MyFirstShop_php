@@ -2,7 +2,6 @@
 
 @section('content')
     <div class="container">
-{{--        @dd($order);--}}
         <h1>Деталі замовлення #{{ $order->id }}</h1>
         <p>Статус: {{ $order->status_name }}</p>
         <p>Коментар: {{ $order->comment }}</p>
@@ -23,16 +22,44 @@
                     <td>{{ $orderProduct->product->title }}</td>
                     <td>{{ $orderProduct->quantity }}</td>
                     <td>{{ $orderProduct->price }} &#8372;</td>
-                    <td>{{ $orderProduct->price * $orderProduct->quantity}} &#8372;</td>
+                    <td>{{ $orderProduct->price * $orderProduct->quantity }} &#8372;</td>
                 </tr>
             @endforeach
 
-            <td></td>
-            <td></td>
-            <td>Всього:</td>
-            <td>{{$order->total_amount}} &#8372;</td>
+            <tr>
+                <td></td>
+                <td></td>
+                <td>Всього:</td>
+                <td>{{ $order->total_amount }} &#8372;</td>
+            </tr>
             </tbody>
         </table>
+
+        <!-- Додаємо перевірку на статус PAID і залогованого користувача -->
+        @if($order->status === \App\Models\OrderStatus::NOTPAIDED && $order->user_id === auth()->user()->id)
+            <form action="{{ route('orders.pay', $order->id) }}" method="POST">
+                @csrf
+                <button type="submit" class="btn btn-success">Оплатити замовлення</button>
+            </form>
+        @endif
+
+        @if(auth()->user()->role === 'Admin' || auth()->user()->role === 'Manager')
+        <h4>Змінити статус замовлення</h4>
+        <form action="{{ route('orders.updateStatus', $order->id) }}" method="POST">
+            @csrf
+            @method('PUT')
+            <div class="form-group">
+                <label for="status">Виберіть новий статус:</label>
+                <select name="status" id="status" class="form-control">
+                    @foreach(\App\Models\OrderStatus::statusLabels() as $status => $label)
+                        <option value="{{ $status }}" {{ $order->status == $status ? 'selected' : '' }}>{{ $label }}</option>
+                    @endforeach
+
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Змінити статус</button>
+        </form>
+        @endif
 
         <a href="{{ route('orders.index') }}" class="btn btn-secondary">Назад до замовлень</a>
     </div>

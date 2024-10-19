@@ -67,6 +67,12 @@
                                 </svg>
                             </button>
                         </form>
+                        <form action="{{ route('orders.users', $user->id) }}" method="GET" style="display:inline;">
+                            @csrf
+                            <button type="submit" class="btn btn-sm btn-primary" title="Orders">
+                            </button>
+                        </form>
+
                     @endif
                 </td>
             </tr>

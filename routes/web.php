@@ -41,9 +41,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/create', [OrderController::class, 'create'])->name('orders.create');
     Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
+    Route::get('/orders/users/{user}', [OrderController::class, 'getUserOrders'])->name('orders.users');
     Route::get('/orders/{id}', [OrderController::class, 'show'])->name('orders.show');
     Route::delete('/orders/{id}', [OrderController::class, 'destroy'])->name('orders.destroy');
-
+    Route::get('/orders/users/{id}', [OrderController::class, 'users'])->name('orders.users');
+    Route::put('/orders/{id}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
+    Route::post('/orders/{order}/pay', [OrderController::class, 'pay'])->name('orders.pay');
 });
 
 Route::resource('products', ProductsController::class);

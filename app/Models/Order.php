@@ -87,17 +87,30 @@ class Order extends Model
             case OrderStatus::NEW:
                 return 'Нове';
             case OrderStatus::IN_PROGRESS:
-                return 'Готується до висилання';
+                return 'Готується до відправлення';
             case OrderStatus::COMPLETED:
                 return 'Завершено';
             case OrderStatus::CANCELED:
                 return 'Скасовано';
-            case OrderStatus::PAID:
+            case OrderStatus::NOTPAIDED:
                 return 'Очікується оплата';
+            case OrderStatus::PAIDED:
+                return 'Оплачено';
             case OrderStatus::SHIPPED:
                 return 'Відправлено';
             default:
                 return 'Невідомий статус';
         }
+    }
+
+    public function pay(Order $order)
+    {
+        // Логіка для обробки платежу, наприклад інтеграція з LiqPay
+        // Перевірка чи користувач має право оплачувати це замовлення
+        if ($order->user_id !== auth()->user()->id || $order->status !== OrderStatus::PAID) {
+            return redirect()->back()->with('error', 'У вас немає прав для оплати цього замовлення.');
+        }
+
+        // TODO Логіка оплати...
     }
 }

@@ -8,7 +8,26 @@ class OrderStatus
     const IN_PROGRESS = 1;
     const COMPLETED = 2;
     const CANCELED = 3;
-    const PAID = 4;
-    const SHIPPED = 5;
+    const NOTPAIDED = 4;
+    const PAIDED = 5;
+    const SHIPPED = 6;
 
+
+    public static function getConstants()
+    {
+        return (new \ReflectionClass(__CLASS__))->getConstants();
+    }
+
+    public static function statusLabels()
+    {
+        return [
+            self::NEW => 'Нове',
+            self::IN_PROGRESS => 'Готується до відправлення',
+            self::COMPLETED => 'Завершено',
+            self::CANCELED => 'Скасовано',
+            self::NOTPAIDED => 'Очікується оплата',
+            self::PAIDED => 'Оплачено',
+            self::SHIPPED => 'Відправлено',
+        ];
+    }
 }

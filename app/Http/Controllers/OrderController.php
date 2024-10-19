@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Models\OrderProduct;
 use App\Models\Product;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\OrderStatus;
@@ -15,8 +16,28 @@ class OrderController extends Controller
     {
         // Отримуємо всі замовлення поточного користувача
         $orders = Order::where('user_id', Auth::id())->get();
+//        dd($orders);
         return view('orders.index', compact('orders'));
     }
+
+    public function users( Request $request, $id)
+    {
+
+//dd($request);
+        $userName = User::find($id);;
+        $status = $request->get('status');
+
+        $orders = Order::where('user_id', $id);
+
+        if ($status) {
+            $orders->where('status', $status);
+        }
+
+        $orders = $orders->get();
+//dd($orders);
+        return view('orders.users',  compact('orders','status', 'id', 'userName'));
+    }
+
 
     public function create()
     {
@@ -96,7 +117,7 @@ class OrderController extends Controller
 
         // Логіка для оплати через LiqPay
         if ($request->input('payment_method') === 'liqpay') {
-            $order->status = OrderStatus::PAID; // статус "Очікується оплата"
+            $order->status = OrderStatus::NOTPAIDED; // статус "Очікується оплата"
             $order->save();
             return redirect()->route('home')->with('success', 'Замовлення оформлено! Перейдіть до оплати.');
         }
@@ -112,7 +133,24 @@ class OrderController extends Controller
         // Показуємо деталі замовлення
         $order = Order::with('orderProducts.product')->findOrFail($id);
 //        dd($order);
-        return view('orders.show', compact('order'));
+        return view('orders.show', compact('order', 'id'));
+    }
+
+    public function updateStatus(Request $request, $id)
+    {
+//        if (!auth()->user()->isAdmin() && !auth()->user()->isManager()) {
+//            return redirect()->back()->with('error', 'У вас немає доступу для зміни статусу замовлення.');
+//        }
+
+        $request->validate([
+            'status' => 'required|in:' . implode(',', \App\Models\OrderStatus::getConstants()),
+        ]);
+
+        $order = Order::findOrFail($id);
+        $order->status = $request->input('status');
+        $order->save();
+
+        return redirect()->route('orders.users', $order->user_id)->with('success', 'Статус замовлення успішно змінено.');
     }
 
     public function destroy($id)
@@ -122,5 +160,24 @@ class OrderController extends Controller
         $order->delete();
 
         return redirect()->route('orders.index')->with('success', 'Замовлення видалено!');
+    }
+
+    public function getUserOrders($userId, Request $request)
+    {
+        // Знаходимо користувача
+        $user = User::findOrFail($userId);
+
+        // Отримуємо фільтрований статус
+        $status = $request->input('status');
+
+        // Отримуємо замовлення цього користувача
+        $orders = Order::where('user_id', $user->id)
+            ->when($status, function($query, $status) {
+                return $query->where('status', $status);
+            })
+            ->get();
+
+        // Повертаємо вигляд з передачею змінних
+        return view('orders.users', compact('user', 'orders', 'status'));
     }
 }
