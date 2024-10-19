@@ -19,7 +19,9 @@ Route::get('/', function () {
     return view('components.navigation');
 });
 
-
+Route::middleware(['auth', 'Admin'])->group(function () {
+    Route::resource('roles', RoleController::class);
+});
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/privacy', [HomeController::class, 'privacy'])->name('privacy');

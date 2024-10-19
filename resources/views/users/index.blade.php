@@ -69,7 +69,7 @@
                         </form>
                         <form action="{{ route('orders.users', $user->id) }}" method="GET" style="display:inline;">
                             @csrf
-                            <button type="submit" class="btn btn-sm btn-primary" title="Orders">
+                            <button type="submit" class="btn btn-primary" title="Orders">Orders
                             </button>
                         </form>
 
