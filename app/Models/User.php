@@ -12,6 +12,7 @@ class User extends Authenticatable implements MustVerifyEmail
 {
     use HasRoles;
     use HasFactory, Notifiable;
+
     /**
      * The attributes that are mass assignable.
      *
@@ -45,8 +46,22 @@ class User extends Authenticatable implements MustVerifyEmail
             'password' => 'hashed',
         ];
     }
+
     public function info()
     {
         return $this->hasOne(Info::class, 'user_id'); // Зв'язок з таблицею infos
+    }
+
+    public function hasRole($role)
+    {
+        return $this->roles()->where('name', $role)->exists();
+
+    }
+
+
+    public function hasAnyRole(array $roles)
+    {
+        return in_array($this->role, $roles);
+
     }
 }

@@ -25,10 +25,14 @@
                     </li>
 
                     @endif
+
+                    @if (Auth::check() && (Auth::user()->hasRole('Admin')))
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" href="{{ route('roles.index') }}">Roles</a>
+                    </li>
+
+                    @endif
                     @if (Auth::check() && (Auth::user()->hasRole('Admin') || Auth::user()->hasRole('Manager')))
-                        <li class="nav-item">
-                              <a class="nav-link text-dark" href="{{ route('roles.index') }}">Roles</a>
-                        </li>
                         <li class="nav-item">
                               <a class="nav-link text-dark" href="{{ route('users.index') }}">Users</a>
                         </li>

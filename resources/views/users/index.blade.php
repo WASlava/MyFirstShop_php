@@ -67,12 +67,13 @@
                                 </svg>
                             </button>
                         </form>
+                    @endif
+                    @if (Auth::check() && ((Auth::user()->hasRole('Admin')) || (Auth::user()->hasRole('Manager'))))
                         <form action="{{ route('orders.users', $user->id) }}" method="GET" style="display:inline;">
                             @csrf
                             <button type="submit" class="btn btn-primary" title="Orders">Orders
                             </button>
                         </form>
-
                     @endif
                 </td>
             </tr>

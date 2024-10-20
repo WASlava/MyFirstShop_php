@@ -43,22 +43,33 @@
             </form>
         @endif
 
-        @if(auth()->user()->role === 'Admin' || auth()->user()->role === 'Manager')
-        <h4>Змінити статус замовлення</h4>
-        <form action="{{ route('orders.updateStatus', $order->id) }}" method="POST">
-            @csrf
-            @method('PUT')
-            <div class="form-group">
-                <label for="status">Виберіть новий статус:</label>
-                <select name="status" id="status" class="form-control">
-                    @foreach(\App\Models\OrderStatus::statusLabels() as $status => $label)
-                        <option value="{{ $status }}" {{ $order->status == $status ? 'selected' : '' }}>{{ $label }}</option>
-                    @endforeach
+        @if(auth()->user()->hasRole('Admin') || auth()->user()->hasRole('Manager'))
 
-                </select>
-            </div>
-            <button type="submit" class="btn btn-primary">Змінити статус</button>
-        </form>
+        <h4>Змінити статус замовлення</h4>
+            <form action="{{ route('orders.updateStatus', $order->id) }}" method="POST">
+                @csrf
+                @method('PUT')
+                <div class="form-group">
+                    <label for="status">Виберіть новий статус:</label>
+                    <select name="status" id="status" class="form-control">
+                        @if($order->status == \App\Models\OrderStatus::NOTPAIDED)
+                            <!-- Якщо статус "Очікується оплата", то показуємо тільки варіант "Скасовано" -->
+                            <option value="{{ \App\Models\OrderStatus::NOTPAIDED }}" {{ $order->status == \App\Models\OrderStatus::NOTPAIDED ? 'selected' : '' }}>
+                                Очікується оплата
+                            </option>
+                            <option value="{{ \App\Models\OrderStatus::CANCELED }}" {{ $order->status == \App\Models\OrderStatus::CANCELED ? 'selected' : '' }}>
+                                Скасовано
+                            </option>
+                        @else
+                            <!-- Якщо інший статус, показуємо всі доступні -->
+                            @foreach(\App\Models\OrderStatus::statusLabels() as $status => $label)
+                                <option value="{{ $status }}" {{ $order->status == $status ? 'selected' : '' }}>{{ $label }}</option>
+                            @endforeach
+                        @endif
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Змінити статус</button>
+            </form>
         @endif
 
         <a href="{{ route('orders.index') }}" class="btn btn-secondary">Назад до замовлень</a>

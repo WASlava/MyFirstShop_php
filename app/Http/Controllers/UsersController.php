@@ -183,14 +183,19 @@ class UsersController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        // Додайте лог для перевірки значення ролі
-        \Log::info('Selected role:', [$request->role]);
 
         // Оновлення ролі
         $user->syncRoles($request->role);
 
         return redirect()->route('users.index')->with('success', 'Role updated successfully');
     }
+
+    public function show($id)
+    {
+        $user = User::with('info', 'roles')->findOrFail($id);
+        return view('users.show', compact('user'));
+    }
+
 
     // Видалення користувача
     public function destroy($id)
@@ -199,4 +204,6 @@ class UsersController extends Controller
         $user->delete();
         return redirect()->route('users.index')->with('success', 'User deleted successfully');
     }
+
+
 }
