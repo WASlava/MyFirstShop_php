@@ -2,7 +2,7 @@
     $currentAction = request()->route()->getName(); // Отримуємо поточний маршрут
 @endphp
 
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
+<nav id="second-navbar" class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container-fluid">
         <div class="collapse navbar-collapse" id="navbarNavDropdown">
             <ul class="navbar-nav">

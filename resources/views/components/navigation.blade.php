@@ -1,4 +1,4 @@
-<nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-1">
+<nav id="main-navbar" class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-1 fixed-top">
     <div class="container-fluid">
 {{--        <a class="navbar-brand" href="#">My Online Store</a>--}}
                     <a class="navbar-brand" href="{{ route('home') }}">My Online Store</a>

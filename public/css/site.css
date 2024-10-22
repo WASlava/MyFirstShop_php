@@ -113,7 +113,7 @@ header {
 }
 
 .main-content {
-    padding-top: 10px;
+    padding-top: 120px;
     padding-bottom: 30px;
     overflow-y: auto;
     height: calc(100vh - 120px);
@@ -142,4 +142,16 @@ footer {
     background-color: white;
     box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
     padding: 10px 0;
+}
+.fixed-top {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1030; /* Щоб меню було вище інших елементів */
+}
+.fixed-top1 {
+    position: fixed;
+    top: 60px;
+    width: 100%;
+    z-index: 998; /* Щоб меню було вище інших елементів */
 }

@@ -28,12 +28,27 @@
 
 @include('components.navigation')
 
-<div class="container-fluid">
+<div class="container-fluid fixed-top1">
     @if ($currentController == 'home' || $currentController == 'products.index')
         @include('components.categories-menu', ['categories' => $categories])
     @endif
 </div>
+{{--<script>--}}
+{{--    function adjustPaddingTop() {--}}
+{{--        var mainNavbarHeight = document.getElementById('main-navbar').offsetHeight;--}}
+{{--        var secondNavbar = document.getElementById('second-navbar');--}}
+{{--        var secondNavbarHeight = secondNavbar ? secondNavbar.offsetHeight : 0;--}}
 
+{{--        var totalNavbarHeight = mainNavbarHeight + secondNavbarHeight;--}}
+{{--        document.querySelector('.main-content').style.paddingTop = totalNavbarHeight + 'px';--}}
+{{--    }--}}
+
+{{--    // Викликаємо функцію при завантаженні сторінки--}}
+{{--    window.onload = adjustPaddingTop;--}}
+
+{{--    // Викликаємо функцію при зміні розміру вікна--}}
+{{--    window.onresize = adjustPaddingTop;--}}
+{{--</script>--}}
 <div class="container main-content">
     <main role="main" class="pb-3">
         @yield('content')
@@ -58,6 +73,7 @@
         &copy; 2024 - "My Online Store" - <a href="{{ route('privacy') }}">Privacy</a>
     </div>
 </footer>
+
 
 <!-- Font Awesome -->
 <script src="https://kit.fontawesome.com/ffcaad880f.js" crossorigin="anonymous"></script>
