@@ -86,6 +86,14 @@
             </div>
 
             <div class="mb-3">
+                <label for="current_password" class="form-label">Current Password (optional)</label>
+                <input type="password" class="form-control" id="current_password" name="current_password" autocomplete="new-password" placeholder="Leave blank if you don't want to change it">
+                @error('current_password')
+                <div class="text-danger">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div class="mb-3">
                 <label for="password" class="form-label">New Password (optional)</label>
                 <input type="password" class="form-control" id="password" name="password" placeholder="Leave blank if you don't want to change it">
                 @error('password')

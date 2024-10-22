@@ -15,7 +15,7 @@ return new class extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users');
-            $table->integer('status')->default(OrderStatus::NEW);
+            $table->integer('status')->default(OrderStatus::IN_PROGRESS);
             $table->string('comment', 100)->nullable();;
             $table->timestamps();
         });

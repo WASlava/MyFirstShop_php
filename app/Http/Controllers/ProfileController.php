@@ -57,6 +57,7 @@ class ProfileController extends Controller
             'city' => 'nullable|string|max:255',
             'postal_code' => 'nullable|string|max:20',
             'country' => 'nullable|string|max:255',
+            'current_password' => ['nullable', 'required_with:password', 'string'],
             'password' => 'nullable|string|confirmed|min:8',
         ]);
 
@@ -67,6 +68,10 @@ class ProfileController extends Controller
         $user->email = $request->email;
 
         if ($request->filled('password')) {
+            if (!Hash::check($request->current_password, $user->password)) {
+                session()->flash('error', 'Не вірний поточний пароль');
+                return redirect()->back();
+            }
             $user->password = Hash::make($request->password);
         }
 

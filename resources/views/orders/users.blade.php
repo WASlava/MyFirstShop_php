@@ -7,16 +7,15 @@
 
         <form action="{{ route('orders.users', $user->id) }}" method="GET">
             <div class="form-group">
-                <label for="status">Filter by Status:</label>
+                <label for="status">Фільтр за статусом:</label>
                 <select name="status" id="status" class="form-control">
-                    <option value="">All</option>
-                    <option value="NEW" {{ $status == 'NEW' ? 'selected' : '' }}>New</option>
-                    <option value="IN_PROGRESS" {{ $status == 'IN_PROGRESS' ? 'selected' : '' }}>In Progress</option>
-                    <option value="COMPLETED" {{ $status == 'COMPLETED' ? 'selected' : '' }}>Completed</option>
-                    <option value="CANCELED" {{ $status == 'CANCELED' ? 'selected' : '' }}>Canceled</option>
+                    <option value="">Всі</option>
+                    @foreach(\App\Models\OrderStatus::statusLabels() as $status => $label)
+                        <option value="{{ $status }}" {{ $status == request()->input('status') ? 'selected' : '' }}>{{ $label }}</option>
+                    @endforeach
                 </select>
             </div>
-            <button type="submit" class="btn btn-primary">Filter</button>
+            <button type="submit" class="btn btn-primary">Фільтрувати</button>
         </form>
 
         @if ($orders->count() > 0)

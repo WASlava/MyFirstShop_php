@@ -6,8 +6,8 @@
     <table>
         <thead>
         <tr>
-            <th>Name</th>
-            <th>Actions</th>
+            <th style="width: 300px">Name</th>
+            <th style="width: 200px">Actions</th>
         </tr>
         </thead>
         <tbody>
@@ -40,3 +40,5 @@
         </tbody>
     </table>
 @endsection
+
+

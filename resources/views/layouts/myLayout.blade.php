@@ -34,12 +34,25 @@
     @endif
 </div>
 
-<div class="container">
+<div class="container main-content">
     <main role="main" class="pb-3">
         @yield('content')
     </main>
 </div>
 
+@if(session('success'))
+    <div class="alert alert-success fixed-alert">
+        {{ session('success') }}
+    </div>
+@endif
+
+@if(session('error'))
+    <div class="alert alert-danger fixed-alert">
+        {{ session('error') }}
+    </div>
+@endif
+
+{{--<footer class="footer-container">--}}
 <footer class="border-top footer text-muted sticky-footer">
     <div class="container">
         &copy; 2024 - "My Online Store" - <a href="{{ route('privacy') }}">Privacy</a>

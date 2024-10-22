@@ -54,8 +54,8 @@ class CartController extends Controller
         }
 
         session()->put('cart', $cart); // Зберігаємо кошик у сесії
-
-        return redirect()->route('cart.index')->with('success', 'Product added to cart!');
+        return back()->with('success', 'Product added to cart!');
+//        return redirect()->route('cart.index')->with('success', 'Product added to cart!');
     }
 
     // Оновлення кількості товару

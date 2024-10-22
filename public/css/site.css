@@ -13,12 +13,15 @@ html {
 }
 
 html {
-  position: relative;
-  min-height: 100%;
+
+  height: 100%;
 }
 
 body {
-  margin-bottom: 60px;
+    margin-bottom: 60px;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
 }
 
 .white-space-nowrap {
@@ -99,3 +102,44 @@ body {
     .price-cart-container p {
         margin-bottom: 0;
     }
+header {
+    position: fixed;
+    top: 0; /* Закріплює вгорі */
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    /*background-color: lightblue;*/
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.main-content {
+    padding-top: 10px;
+    padding-bottom: 30px;
+    overflow-y: auto;
+    height: calc(100vh - 120px);
+}
+
+.table-container {
+    padding: 20px;
+}
+
+.fixed-alert {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 30px;
+    z-index: 999;
+    width: 100%;
+    transition: opacity 0.3s ease;
+}
+
+footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    /*background-color: white;*/
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+    padding: 10px 0;
+}

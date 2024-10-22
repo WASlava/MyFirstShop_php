@@ -73,7 +73,7 @@ class Order extends Model
 
     public function scopePaid(Builder $query): Builder
     {
-        return $query->where('status', '=', OrderStatus::PAID);
+        return $query->where('status', '=', OrderStatus::PAIDED);
     }
 
     public function scopeShipped(Builder $query): Builder
@@ -84,8 +84,8 @@ class Order extends Model
     public function getStatusNameAttribute()
     {
         switch ($this->status) {
-            case OrderStatus::NEW:
-                return 'Нове';
+//            case OrderStatus::NEW:
+//                return 'Нове';
             case OrderStatus::IN_PROGRESS:
                 return 'Готується до відправлення';
             case OrderStatus::COMPLETED:
@@ -105,12 +105,22 @@ class Order extends Model
 
     public function pay(Order $order)
     {
-        // Логіка для обробки платежу, наприклад інтеграція з LiqPay
         // Перевірка чи користувач має право оплачувати це замовлення
-        if ($order->user_id !== auth()->user()->id || $order->status !== OrderStatus::PAID) {
+        if ($order->user_id !== auth()->user()->id || $order->status !== OrderStatus::NOTPAIDED) {
             return redirect()->back()->with('error', 'У вас немає прав для оплати цього замовлення.');
         }
 
-        // TODO Логіка оплати...
+
+        try {
+            // TODO: Виклик API LiqPay або іншого сервісу оплати
+
+            // Якщо оплата успішна, оновлюємо статус замовлення
+            $order->status = OrderStatus::PAIDED;
+            $order->save();
+
+            return redirect()->route('orders.show', $order->id)->with('success', 'Замовлення успішно оплачено.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Сталася помилка під час оплати. Спробуйте пізніше.');
+        }
     }
 }

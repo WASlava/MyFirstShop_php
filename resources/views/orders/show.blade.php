@@ -35,7 +35,7 @@
             </tbody>
         </table>
 
-        <!-- Додаємо перевірку на статус PAID і залогованого користувача -->
+        <!-- Додаємо перевірку на статус NOTPAIDED і залогованого користувача -->
         @if($order->status === \App\Models\OrderStatus::NOTPAIDED && $order->user_id === auth()->user()->id)
             <form action="{{ route('orders.pay', $order->id) }}" method="POST">
                 @csrf
@@ -43,7 +43,7 @@
             </form>
         @endif
 
-        @if(auth()->user()->hasRole('Admin') || auth()->user()->hasRole('Manager'))
+        @if((auth()->user()->hasRole('Admin') || auth()->user()->hasRole('Manager')) && !($order->status == \App\Models\OrderStatus::CANCELED) )
 
         <h4>Змінити статус замовлення</h4>
             <form action="{{ route('orders.updateStatus', $order->id) }}" method="POST">
@@ -61,7 +61,8 @@
                                 Скасовано
                             </option>
                         @else
-                            <!-- Якщо інший статус, показуємо всі доступні -->
+
+                        <!-- Якщо інший статус, показуємо всі доступні -->
                             @foreach(\App\Models\OrderStatus::statusLabels() as $status => $label)
                                 <option value="{{ $status }}" {{ $order->status == $status ? 'selected' : '' }}>{{ $label }}</option>
                             @endforeach
@@ -72,6 +73,6 @@
             </form>
         @endif
 
-        <a href="{{ route('orders.index') }}" class="btn btn-secondary">Назад до замовлень</a>
+        <button onclick="window.history.back();" class="btn btn-secondary">Назад до замовлень</button>
     </div>
 @endsection

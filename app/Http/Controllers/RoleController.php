@@ -57,10 +57,20 @@ class RoleController extends Controller
 
     public function destroy($id)
     {
+        // Знаходимо роль
         $role = $this->roleManager->find($id);
+
+        // Перевіряємо, чи є користувачі з цією роллю
+        $usersWithRole = User::role($role->name)->count();
+
+        if ($usersWithRole > 0) {
+            return redirect()->route('roles.index')->with('error', 'Неможливо видалити роль, оскільки вона призначена користувачам.');
+        }
+
+        // Якщо користувачів з цією роллю немає, видаляємо роль
         $this->roleManager->delete($role);
 
-        return redirect()->route('roles.index')->with('success', 'Role deleted successfully.');
+        return redirect()->route('roles.index')->with('success', 'Роль успішно видалено.');
     }
 
     public function assignRole(Request $request, $userId)

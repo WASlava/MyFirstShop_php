@@ -81,7 +81,7 @@ class OrderController extends Controller
         // Створюємо нове замовлення
         $order = new Order();
         $order->user_id = Auth::id();
-        $order->status = OrderStatus::NEW; // статус "Нове"
+//        $order->status = OrderStatus::NEW; // статус "Нове"
         $order->comment = $request->input('comment', null); // Дозволяємо пустий коментар
         $order->delivery_method = $request->input('delivery_method'); // Зберігаємо метод доставки
         $order->payment_method = $request->input('payment_method'); // Зберігаємо метод оплати
@@ -138,9 +138,6 @@ class OrderController extends Controller
 
     public function updateStatus(Request $request, $id)
     {
-//        if (!auth()->user()->isAdmin() && !auth()->user()->isManager()) {
-//            return redirect()->back()->with('error', 'У вас немає доступу для зміни статусу замовлення.');
-//        }
 
         $request->validate([
             'status' => 'required|in:' . implode(',', \App\Models\OrderStatus::getConstants()),
@@ -180,4 +177,26 @@ class OrderController extends Controller
         // Повертаємо вигляд з передачею змінних
         return view('orders.users', compact('user', 'orders', 'status'));
     }
+
+    public function userOrders(Request $request, $userId)
+    {
+        $user = User::findOrFail($userId);
+
+        // Отримуємо замовлення користувача
+        $query = Order::where('user_id', $userId);
+
+        // Якщо передано статус, додаємо фільтрацію
+        if ($request->has('status') && $request->status !== '') {
+            $query->where('status', $request->input('status'));
+        }
+
+        $orders = $query->get();
+
+        return view('orders.index', [
+            'user' => $user,
+            'orders' => $orders,
+            'status' => $request->input('status'),
+        ]);
+    }
+//
 }

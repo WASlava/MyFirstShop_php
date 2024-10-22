@@ -21,7 +21,7 @@ class OrderStatus
     public static function statusLabels()
     {
         return [
-            self::NEW => 'Нове',
+//            self::NEW => 'Нове',
             self::IN_PROGRESS => 'Готується до відправлення',
             self::COMPLETED => 'Завершено',
             self::CANCELED => 'Скасовано',
